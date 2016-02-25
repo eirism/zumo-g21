@@ -31,8 +31,8 @@ unsigned int uS;
 unsigned long timeSeen;
 
 boolean driveForward = false;
-unsigned int spinTime = 0;
-unsigned int driveTime = 0;
+unsigned long spinTime = 0;
+unsigned long driveTime = 0;
  
 void setup() {
    Serial.begin(9600);
@@ -66,7 +66,7 @@ void loop() {
     // if rightmost sensor detects line, reverse and turn to the left
     motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
     delay(REVERSE_DURATION);
-    motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
+    motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
     delay(TURN_DURATION);
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
   }else if (uS < 70 && uS > 0){ // Drive straight is it detects something in range 0 - 40.
@@ -90,7 +90,7 @@ void loop() {
       spinTime = millis();
     }
     motors.setSpeeds(-300, 300); // Spins around if it doesn't see anything.
-    if (millis() - spinTime > 500){
+    if (millis() - spinTime > 800){
       driveForward = true;
       spinTime = 0;
     }
