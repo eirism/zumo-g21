@@ -45,7 +45,7 @@ void setup()
 
 void loop() 
 {
-  	if((millis()-timer)>=20){ // 50 Hz loop
+	if((millis()-timer)>=21){ // 50 Hz loop
 		minIMU_loop();
 		if(isMoving){
 			moveCounter += 1;
@@ -61,17 +61,17 @@ void loop()
 			float error = angleDiff(yaw, setpoint);
 			cum_error += error;
 			float rotateSpeed = kp * (error +  include_ti*cum_error/ti + include_td * td * (old_error - error));
-		    motors.setSpeeds(-rotateSpeed, rotateSpeed);
+			motors.setSpeeds(-rotateSpeed, rotateSpeed);
 			Serial.print("error: ");
-		    Serial.println(error);
+			Serial.println(error);
 			Serial.print("rotateSpeed: ");
-		    Serial.println(rotateSpeed);
+			Serial.println(rotateSpeed);
 			old_error = error;
 			if(abs(error)<errorLimit || (false && abs(rotateSpeed)<speedLimit)){
-		    	motors.setSpeeds(0, 0);
-		    	old_error = 0;
-		    	cum_error = 0;
-		    	isRotating = false;
+				motors.setSpeeds(0, 0);
+				old_error = 0;
+				cum_error = 0;
+				isRotating = false;
 			}
 		}
 
