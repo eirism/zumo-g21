@@ -33,6 +33,7 @@ unsigned int sonarR_distance;
 unsigned int sonarC_distance;
 unsigned int sonarL_distance;
 
+char lastSeen;
 
 void setup() {
   Serial.begin(9600);
@@ -60,20 +61,26 @@ void loop() {
     motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
     delay(TURN_DURATION);
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-  }else if (sensor_values[5] < QTR_THRESHOLD){
+  } else if (sensor_values[5] < QTR_THRESHOLD) {
     // if rightmost sensor detects line, reverse and turn to the left
     motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
     delay(REVERSE_DURATION);
     motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
     delay(TURN_DURATION);
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-  }else if (sonarC_distance < 70 && sonarC_distance > 0) {
+  } else if (sonarC_distance < 70 && sonarC_distance > 0) {
     motors.setSpeeds(400,400);
-  }else if (sonarR_distance < 70 && sonarR_distance > 0) {
-    motors.setSpeeds(400,200);
-  }else if (sonarL_distance < 70 && sonarL_distance > 0) {
-    motors.setSpeeds(200,400);
-  }else{
+  } else if (sonarR_distance < 70 && sonarR_distance > 0) {
+    lastSeen = 'R';
+    motors.setSpeeds(400,300);
+  } else if (sonarL_distance < 70 && sonarL_distance > 0) {
+    lastSeen = 'L';
+    motors.setSpeeds(300,400);
+  } else if (lastSeen == 'R') {
+    motors.setSpeeds(400,100);
+  } else if (lastSeen == 'L') {
+    motors.setSpeeds(100,400);
+  } else {
     motors.setSpeeds(-300, 300); // Spins around if it doesn't see anything.
   }
 }
