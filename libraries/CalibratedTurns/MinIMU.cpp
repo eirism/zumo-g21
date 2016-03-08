@@ -28,8 +28,25 @@ with MinIMU-9-Arduino-AHRS. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include "test.hpp"
+#include "MinIMU.h"
 
+//Normalize to [-180,180):
+float constrainAngle(float x){
+    x = fmod(x + M_PI,M_2PI);
+    if (x < 0)
+        x += M_2PI;
+    return x - M_PI;
+}
+// convert to [-360,360]
+float angleConv(float angle){
+    return fmod(constrainAngle(angle),M_2PI);
+}
+float angleDiff(float a,float b){
+    float dif = fmod(b - a + M_PI,M_2PI);
+    if (dif < 0)
+        dif += M_2PI;
+    return dif - M_PI;
+}
 
 int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1}; //Correct directions x,y,z - gyro, accelerometer, magnetometer
 
@@ -43,7 +60,7 @@ int M_Z_MAX  = EEPROM.get(10, temp);
 
 float G_Dt=0.02;    // Integration time (DCM algorithm)  We will run the integration loop at 50Hz if possible
 
-long timer=0;
+extern long timer;
 long timer_old;
 long timer24=0; //Second timer used to print values 
 int AN[6]; //array that stores the gyro and accelerometer data
@@ -65,7 +82,7 @@ float MAG_Heading;
 
 float roll;
 float pitch;
-float yaw;
+extern float yaw;
 
 float errorRollPitch[3]= {0,0,0}; 
 float errorYaw[3]= {0,0,0};
@@ -85,7 +102,7 @@ float DCM_Matrix[3][3]= {{1,0,0},{0,1,0},{0,0,1}};
 float Update_Matrix[3][3]={{0,1,2},{3,4,5},{6,7,8}}; //Gyros here
 float Temporary_Matrix[3][3]={{0,0,0},{0,0,0},{0,0,0}};
 
-unsigned int counter=0;
+extern unsigned int counter;
 
 L3G gyro;
 LSM303 compass;
@@ -116,13 +133,12 @@ void minIMU_setup()
   
   timer=millis();
   delay(20);
-  counter=5;
 }
 
 void minIMU_loop() //Main Loop
 {
-  if((millis()-timer)>=20)  // Main loop runs at 50Hz
-  {
+  //if((millis()-timer)>=20)  // Main loop runs at 50Hz
+  //{
     counter++;
     timer_old = timer;
     timer=millis();
@@ -153,7 +169,7 @@ void minIMU_loop() //Main Loop
     // ***
    
     //printdata();
-  }
+  //}
    
 }
 

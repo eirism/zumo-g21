@@ -1,16 +1,9 @@
+#include "CalibratedTurns.h"
+#include "MinIMU.h"
 
-#include <PLab_ZumoMotors.h>
-#include <Pushbutton.h>
-#include <Wire.h>
-#include <EEPROM.h>
-#include <L3G.h>
-#include <LSM303.h>
-
-#include "Util.hpp"
-#include "test.hpp"
-//#include "MinIMU9AHRS.hpp"
-
-
+long timer = 0;
+float yaw;
+int counter=5;
 
 Pushbutton button(ZUMO_BUTTON); 
 PLab_ZumoMotors motors;
@@ -36,17 +29,13 @@ int moveCounter = 0;
 
 bool makeSquare = true;
 
-
-
-void setup()
+void CalibratedTurnsSetup()
 {
 	minIMU_setup();
 }
 
-void loop() 
+void CalibratedTurnsLoop()
 {
-	minIMU_loop();
-	/*
 	if((millis()-timer)>=21){ // 50 Hz loop
 		minIMU_loop();
 		if(isMoving){
@@ -82,5 +71,4 @@ void loop()
 			motors.setSpeeds(200, 200);
 		}
 	}
-	*/
 }

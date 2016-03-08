@@ -1,13 +1,24 @@
-#ifndef TEST_HPP
-#define TEST_HPP
+#ifndef MIN_IMU_HPP
+#define MIN_IMU_HPP
 
 #include <Wire.h>
 #include <EEPROM.h>
 #include <math.h>
-#include "Util.hpp"
 #include <L3G.h>
 #include <LSM303.h>
 
+#include "CalibratedTurns.h"
+
+#define M_2PI 2*M_PI
+
+#define ToRad(x) ((x)*0.01745329252)  // *pi/180
+#define ToDeg(x) ((x)*57.2957795131)  // *180/pi
+
+float constrainAngle(float x);
+
+float angleConv(float angle);
+
+float angleDiff(float a,float b);
 
 #define GRAVITY 256  //this equivalent to 1G in the raw data coming from the accelerometer 
 
