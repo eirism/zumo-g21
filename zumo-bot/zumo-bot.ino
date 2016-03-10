@@ -5,7 +5,6 @@
 #include <ZumoReflectanceSensorArray.h>
 
 // added a symbolic link from zumo-g21\libraries to my arduino\libraries folder. this works.
-#include <Utils.h>
 
 //Speeds for turning
 #define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
@@ -16,7 +15,9 @@
 
 #define NUM_SENSORS 6
 
-#define QTR_THRESHOLD  1500
+#define QTR_THRESHOLD  0
+
+#define MAX_DISTANCE 70
 
 unsigned int sensor_values[NUM_SENSORS];
 
@@ -64,6 +65,7 @@ void loop() {
     motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
     delay(TURN_DURATION);
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+    lastSeen = 'N';
   } 
   else if (sensor_values[5] < QTR_THRESHOLD) {
     // if rightmost sensor detects line, reverse and turn to the left
@@ -72,25 +74,26 @@ void loop() {
     motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
     delay(TURN_DURATION);
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+    lastSeen = 'N';
   } 
   else {
 
-    if (sonarC_distance < 70 && sonarC_distance > 0 && sonarC_distance < sonarR_distance && sonarC_distance < sonarL_distance) {
+    if (sonarC_distance < MAX_DISTANCE && sonarC_distance > 0) {
       motors.setSpeeds(400,400);
     } 
-    else if (sonarR_distance < 70 && sonarR_distance > 0 && sonarR_distance < sonarC_distance && sonarR_distance < sonarL_distance) {
+    else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarR_distance > sonarC_distance && sonarR_distance > sonarL_distance) {
       lastSeen = 'R';
-      motors.setSpeeds(400,300);
+      motors.setSpeeds(0,400);
     } 
-    else if (sonarL_distance < 70 && sonarL_distance > 0 && sonarL_distance < sonarC_distance && sonarL_distance < sonarR_distance) {
+    else if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && sonarL_distance > sonarC_distance && sonarL_distance > sonarR_distance) {
       lastSeen = 'L';
-      motors.setSpeeds(300,400);
+      motors.setSpeeds(400,0);
     } 
     else if (lastSeen == 'R') {
-      motors.setSpeeds(400,100);
+      motors.setSpeeds(0,400);
     } 
     else if (lastSeen == 'L') {
-      motors.setSpeeds(100,400);
+      motors.setSpeeds(400,0);
     } 
     else {
       motors.setSpeeds(-300, 300); // Spins around if it doesn't see anything.
