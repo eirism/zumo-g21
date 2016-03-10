@@ -93,27 +93,28 @@ void loop() {
     }else{
       digitalWrite(3, LOW);
     }
+
     
     if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance < 5)) {
       motors.setSpeeds(400,400);
       lastSeen = 'N';
     } 
-    else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarR_distance < sonarL_distance) {
+    else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0) {
       lastSeen = 'R';
-      motors.setSpeeds(300,400);
+      motors.setSpeeds(400,300);
     } 
     else if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0) {
       lastSeen = 'L';
-      motors.setSpeeds(400,300);
+      motors.setSpeeds(300,400);
     } 
     else if (lastSeen == 'R') {
-      motors.setSpeeds(100,400);
+      motors.setSpeeds(400,-100);
     } 
     else if (lastSeen == 'L') {
-      motors.setSpeeds(400,100);
+      motors.setSpeeds(-100,400);
     } 
     else {
-      motors.setSpeeds(300, -300); // Spins around if it doesn't see anything.
+      motors.setSpeeds(200, -200); // Spins around if it doesn't see anything.
     }
   }
 }
