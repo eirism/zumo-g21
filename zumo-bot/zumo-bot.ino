@@ -15,7 +15,7 @@
 
 #define NUM_SENSORS 6
 
-#define QTR_THRESHOLD  0
+#define QTR_THRESHOLD  1500
 
 #define MAX_DISTANCE 70
 
@@ -25,9 +25,9 @@ ZumoReflectanceSensorArray sensors;
 ZumoMotors motors;
 Pushbutton button(ZUMO_BUTTON);
 
-unsigned int sonarR_distance;
-unsigned int sonarC_distance;
-unsigned int sonarL_distance;
+volatile unsigned int sonarR_distance;
+//unsigned int sonarC_distance;
+volatile unsigned int sonarL_distance;
 
 char lastSeen;
 
@@ -38,23 +38,26 @@ void setup() {
   Wire.begin(9);
   Wire.onReceive(receiveEvent);
   button.waitForButton();
+
+  pinMode(3, OUTPUT); //
+  pinMode(6, OUTPUT); //
 }
 
 void receiveEvent(int bytes) {
 	sonarR_distance = Wire.read();
-    sonarC_distance = Wire.read();
-    sonarL_distance = Wire.read();
+	//sonarC_distance = Wire.read();
+	sonarL_distance = Wire.read();
 }
 
 void loop() {
 
   sensors.read(sensor_values);
-  Serial.print(sensor_values[0]);
-  Serial.print(" ");
-  Serial.println(sensor_values[5]);
+//  Serial.print(sensor_values[0]);
+//  Serial.print(" ");
+//  Serial.println(sensor_values[5]);
   Serial.print(sonarR_distance);
   Serial.print(" ");
-  Serial.print(sonarC_distance);
+  //Serial.print(sonarC_distance);
   Serial.print(" ");
   Serial.println(sonarL_distance);
   
@@ -78,25 +81,39 @@ void loop() {
   } 
   else {
 
-    if (sonarC_distance < MAX_DISTANCE && sonarC_distance > 0) {
+    motors.setSpeeds(0, 0);
+
+    if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0){
+      digitalWrite(6, HIGH);
+    }else{
+      digitalWrite(6, LOW);
+    }
+    if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0){
+      digitalWrite(3, HIGH);
+    }else{
+      digitalWrite(3, LOW);
+    }
+    
+    if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance < 5)) {
       motors.setSpeeds(400,400);
+      lastSeen = 'N';
     } 
-    else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarR_distance > sonarC_distance && sonarR_distance > sonarL_distance) {
+    else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarR_distance < sonarL_distance) {
       lastSeen = 'R';
-      motors.setSpeeds(0,400);
+      motors.setSpeeds(300,400);
     } 
-    else if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && sonarL_distance > sonarC_distance && sonarL_distance > sonarR_distance) {
+    else if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0) {
       lastSeen = 'L';
-      motors.setSpeeds(400,0);
+      motors.setSpeeds(400,300);
     } 
     else if (lastSeen == 'R') {
-      motors.setSpeeds(0,400);
+      motors.setSpeeds(100,400);
     } 
     else if (lastSeen == 'L') {
-      motors.setSpeeds(400,0);
+      motors.setSpeeds(400,100);
     } 
     else {
-      motors.setSpeeds(-300, 300); // Spins around if it doesn't see anything.
+      motors.setSpeeds(300, -300); // Spins around if it doesn't see anything.
     }
   }
 }
