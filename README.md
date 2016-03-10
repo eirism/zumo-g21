@@ -5,7 +5,7 @@ The zumo-bot sketch is the main program, it should always work on master.
 IR-sensor:
 Top view - led to the right
 
-Sensor | 5V
+Sensor (Needs pull-up) | 5V (REMEMBER RESISTOR!!)
 
 GND | GND
 
