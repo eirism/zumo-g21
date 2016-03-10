@@ -9,10 +9,12 @@
 
 class Utils {
     public:
-        Utils();
+        Utils(int delay, int IRThreshold);
         void resetEcho(int pin);
+        bool checkIRFront(int pin);
     private:
-        //
+        int _delay;
+        int _IRThreshold;
 };
 
 #endif
