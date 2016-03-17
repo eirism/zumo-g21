@@ -35,6 +35,8 @@ char lastSeen;
 
 int timer = 0;
 
+bool firstTime = true;
+
 void setup() {
   Serial.begin(9600);
   sensors.init();
@@ -44,6 +46,7 @@ void setup() {
 
   pinMode(3, OUTPUT); //
   pinMode(6, OUTPUT); //
+  pinMode(2, OUTPUT); // indicator for firstTime
 }
 
 void receiveEvent(int bytes) {
@@ -122,9 +125,15 @@ void loop() {
     } 
     else if (lastSeen == 'L') {
       motors.setSpeeds(-100,400);
-    } 
+    }
+    else if (firstTime) {
+      motors.setSpeeds(200, -200);
+      firstTime = !((bool)sonarR_distance || (bool)sonarL_distance);
+      digitalWrite(2, HIGH);
+    }
     else {
-      motors.setSpeeds(200, -200); // Spins around if it doesn't see anything.
+      motors.setSpeeds(300, -300); // Spins around if it doesn't see anything.
+      digitalWrite(2, LOW);
     }
   }
 }
