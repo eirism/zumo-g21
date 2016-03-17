@@ -19,6 +19,8 @@
 
 #define MAX_DISTANCE 70
 
+#define LASTSEEN_INTERVAL 500
+
 unsigned int sensor_values[NUM_SENSORS];
 
 ZumoReflectanceSensorArray sensors;
@@ -31,6 +33,7 @@ volatile unsigned int sonarL_distance;
 
 char lastSeen;
 
+int timer = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -50,6 +53,11 @@ void receiveEvent(int bytes) {
 }
 
 void loop() {
+
+  if (lastSeen !='N' && millis()-timer>LASTSEEN_INTERVAL) {
+      lastSeen = 'N';
+      timer = 0;
+  }
 
   sensors.read(sensor_values);
 //  Serial.print(sensor_values[0]);
@@ -102,10 +110,12 @@ void loop() {
     else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0) {
       lastSeen = 'R';
       motors.setSpeeds(400,300);
+      timer = millis();
     } 
     else if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0) {
       lastSeen = 'L';
       motors.setSpeeds(300,400);
+      timer = millis();
     } 
     else if (lastSeen == 'R') {
       motors.setSpeeds(400,-100);
