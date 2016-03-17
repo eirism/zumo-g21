@@ -7,11 +7,11 @@
 // added a symbolic link from zumo-g21\libraries to my arduino\libraries folder. this works.
 
 //Speeds for turning
-#define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
-#define TURN_SPEED        200
+#define REVERSE_SPEED     300 // 0 is stopped, 400 is full speed
+#define TURN_SPEED        300
 #define FORWARD_SPEED     100
-#define REVERSE_DURATION  200 // ms
-#define TURN_DURATION     300 // ms
+#define REVERSE_DURATION  300 // ms
+#define TURN_DURATION     400 // ms
 
 #define NUM_SENSORS 6
 
