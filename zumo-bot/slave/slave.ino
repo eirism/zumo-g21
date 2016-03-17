@@ -104,10 +104,17 @@ void loop() {
 		//Serial.print(sonarC_distance);
 		//Serial.print(" ");
 		Serial.println(sonarL_distance);
-		if ((sonarR_array[sonarR_pointer] == 0 ) && digitalRead(ECHO_PIN_R) == HIGH) {
+
+		bool right_bad = (sonarR_array[sonarR_pointer] == 0 ) && digitalRead(ECHO_PIN_R) == HIGH;
+		bool left_bad = (sonarL_array[sonarL_pointer] == 0 ) && digitalRead(ECHO_PIN_L) == HIGH;
+
+		if (right_bad && left_bad) {
+			utils.resetEcho(ECHO_PIN_R, ECHO_PIN_L);   
+		}
+		else if (right_bad) {
 			utils.resetEcho(ECHO_PIN_R);   
 		}
-		if ((sonarL_array[sonarL_pointer] == 0 ) && digitalRead(ECHO_PIN_L) == HIGH) {
+		else if (left_bad) {
 			utils.resetEcho(ECHO_PIN_L);   
 		} 
 		sonarR_pointer += 1;
