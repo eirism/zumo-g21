@@ -11,6 +11,7 @@ class Utils {
     public:
         Utils(int delay, int IRThreshold);
         void resetEcho(int pin);
+        void resetEcho(int pin1, int pin2);
         bool checkIRFront(int pin);
     private:
         int _delay;
