@@ -145,7 +145,7 @@ void loop() {
       motors.setSpeeds(300, -300);
     }
     else {
-      motors.setSpeeds(400, 400); // Spins around if it doesn't see anything.
+      motors.setSpeeds(400, 400); 
     }
   }
 }
