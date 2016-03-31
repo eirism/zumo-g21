@@ -88,51 +88,46 @@ void loop() {
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
     lastSeen = 'N';
   } 
-  else if (sensor_values[5] < QTR_THRESHOLD) {
-    // if rightmost sensor detects line, reverse and turn to the left
-    motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-    delay(REVERSE_DURATION);
-    motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
-    delay(TURN_DURATION);
-    motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-    lastSeen = 'N';
-  } 
-  else{
-    search();
-  }
+       else if (sensor_values[5] < QTR_THRESHOLD) {
+        // if rightmost sensor detects line, reverse and turn to the left
+        motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+        delay(REVERSE_DURATION);
+        motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
+        delay(TURN_DURATION);
+        motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+        lastSeen = 'N';
+      } 
+         else{
+          search();
+        }
   
   }
   
-  else if(seen==true){
-         if (sensor_values[2] < QTR_THRESHOLD){
-    // if leftmost sensor detects line, reverse and turn to the right
-    motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-    delay(REVERSE_DURATION);
-    motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
-    delay(TURN_DURATION);
-    motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-    lastSeen = 'N';
-  } 
-  else if (sensor_values[3] < QTR_THRESHOLD) {
-    // if rightmost sensor detects line, reverse and turn to the left
-    motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-    delay(REVERSE_DURATION);
-    motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
-    delay(TURN_DURATION);
-    motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-    lastSeen = 'N';
-  } 
-  
-    else {
-    search();
-
+    else if(seen==true){
+           if (sensor_values[2] < QTR_THRESHOLD){
+      // if leftmost sensor detects line, reverse and turn to the right
+      motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+      delay(REVERSE_DURATION);
+      motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
+      delay(TURN_DURATION);
+      motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+      lastSeen = 'N';
+    } 
+      else if (sensor_values[3] < QTR_THRESHOLD) {
+        // if rightmost sensor detects line, reverse and turn to the left
+        motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+        delay(REVERSE_DURATION);
+        motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
+        delay(TURN_DURATION);
+        motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+        lastSeen = 'N';
+      } 
+        else {
+          search();
+      }   
+    }
   }
-  
     
-  }
- 
-}
-  
   void search(){
     
     motors.setSpeeds(0, 0);
@@ -177,21 +172,31 @@ void loop() {
     } 
     else if (lastSeen == 'R') {
       motors.setSpeeds(400,-100);
+                  seen=false;
+
       
     } 
     else if (lastSeen == 'L') {
       motors.setSpeeds(-100,400);
+                  seen=false;
+
     }
     else if (firstTime) {
+                  seen=false;
+
       motors.setSpeeds(350, -350);
 //      if (millis() - rotateStartTime > 200 && millis() - rotateStartTime < 400){
 //        motors.setSpeeds(400, 400);
 //      }
     }
     else if (millis() % 1000 < 500){
+                  seen=false;
+
       motors.setSpeeds(300, -300);
     }
     else {
+                  seen=false;
+
       motors.setSpeeds(400, 400); 
     }
   }
