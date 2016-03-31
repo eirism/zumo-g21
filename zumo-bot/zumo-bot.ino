@@ -7,11 +7,11 @@
 // added a symbolic link from zumo-g21\libraries to my arduino\libraries folder. this works.
 
 //Speeds for turning
-#define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
-#define TURN_SPEED        200
+#define REVERSE_SPEED     300 // 0 is stopped, 400 is full speed
+#define TURN_SPEED        300
 #define FORWARD_SPEED     100
 #define REVERSE_DURATION  200 // ms
-#define TURN_DURATION     300 // ms
+#define TURN_DURATION     500 // ms
 
 #define NUM_SENSORS 6
 
@@ -33,9 +33,11 @@ volatile unsigned int sonarL_distance;
 
 char lastSeen;
 
-int timer = 0;
+int timer;
 
-bool firstTime = true;
+bool firstTime;
+
+int rotateStartTime;
 
 void setup() {
   Serial.begin(9600);
@@ -46,7 +48,11 @@ void setup() {
 
   pinMode(3, OUTPUT); //
   pinMode(6, OUTPUT); //
-  pinMode(2, OUTPUT); // indicator for firstTime
+  pinMode(1, OUTPUT); // indicator for firstTime
+  
+  firstTime = true;
+  timer = 0;
+  rotateStartTime = millis();
 }
 
 void receiveEvent(int bytes) {
@@ -106,19 +112,22 @@ void loop() {
     }
 
     
-    if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance < 5)) {
+    if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance) < 5) {
       motors.setSpeeds(400,400);
       lastSeen = 'N';
+      firstTime = false;
     } 
     else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0) {
       lastSeen = 'R';
-      motors.setSpeeds(400,300);
+      motors.setSpeeds(400,200);
       timer = millis();
+      firstTime = false;
     } 
     else if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0) {
       lastSeen = 'L';
-      motors.setSpeeds(300,400);
+      motors.setSpeeds(200,400);
       timer = millis();
+      firstTime = false;
     } 
     else if (lastSeen == 'R') {
       motors.setSpeeds(400,-100);
@@ -127,13 +136,16 @@ void loop() {
       motors.setSpeeds(-100,400);
     }
     else if (firstTime) {
-      motors.setSpeeds(200, -200);
-      firstTime = !((bool)sonarR_distance || (bool)sonarL_distance);
-      digitalWrite(2, HIGH);
+      motors.setSpeeds(350, -350);
+//      if (millis() - rotateStartTime > 200 && millis() - rotateStartTime < 400){
+//        motors.setSpeeds(400, 400);
+//      }
+    }
+    else if (millis() % 1000 < 500){
+      motors.setSpeeds(300, -300);
     }
     else {
-      motors.setSpeeds(300, -300); // Spins around if it doesn't see anything.
-      digitalWrite(2, LOW);
+      motors.setSpeeds(400, 400); 
     }
   }
 }
