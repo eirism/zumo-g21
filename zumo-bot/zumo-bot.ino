@@ -34,7 +34,7 @@ volatile unsigned int sonarL_distance;
 char lastSeen;
 
 int timer;
-
+bool seen;
 bool firstTime;
 
 int rotateStartTime;
@@ -49,7 +49,7 @@ void setup() {
   pinMode(3, OUTPUT); //
   pinMode(6, OUTPUT); //
   pinMode(1, OUTPUT); // indicator for firstTime
-  
+  seen=false;
   firstTime = true;
   timer = 0;
   rotateStartTime = millis();
@@ -78,7 +78,8 @@ void loop() {
   Serial.print(" ");
   Serial.println(sonarL_distance);
   
-  if (sensor_values[0] < QTR_THRESHOLD){
+  if(seen==false){
+     if (sensor_values[0] < QTR_THRESHOLD){
     // if leftmost sensor detects line, reverse and turn to the right
     motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
     delay(REVERSE_DURATION);
@@ -96,19 +97,58 @@ void loop() {
     motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
     lastSeen = 'N';
   } 
-  else {
+  else{
+    search();
+  }
+  
+  }
+  
+  else if(seen==true){
+         if (sensor_values[2] < QTR_THRESHOLD){
+    // if leftmost sensor detects line, reverse and turn to the right
+    motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+    delay(REVERSE_DURATION);
+    motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
+    delay(TURN_DURATION);
+    motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+    lastSeen = 'N';
+  } 
+  else if (sensor_values[3] < QTR_THRESHOLD) {
+    // if rightmost sensor detects line, reverse and turn to the left
+    motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+    delay(REVERSE_DURATION);
+    motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
+    delay(TURN_DURATION);
+    motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+    lastSeen = 'N';
+  } 
+  
+    else {
+    search();
 
+  }
+  
+    
+  }
+ 
+}
+  
+  void search(){
+    
     motors.setSpeeds(0, 0);
 
     if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0){
       digitalWrite(6, HIGH);
     }else{
       digitalWrite(6, LOW);
+
     }
     if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0){
       digitalWrite(3, HIGH);
+
     }else{
       digitalWrite(3, LOW);
+
     }
 
     
@@ -116,21 +156,28 @@ void loop() {
       motors.setSpeeds(400,400);
       lastSeen = 'N';
       firstTime = false;
+       seen=true;
+
     } 
     else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0) {
       lastSeen = 'R';
       motors.setSpeeds(400,200);
       timer = millis();
       firstTime = false;
+                  seen=true;
+
     } 
     else if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0) {
       lastSeen = 'L';
       motors.setSpeeds(200,400);
       timer = millis();
       firstTime = false;
+      seen=true;
+
     } 
     else if (lastSeen == 'R') {
       motors.setSpeeds(400,-100);
+      
     } 
     else if (lastSeen == 'L') {
       motors.setSpeeds(-100,400);
@@ -148,4 +195,4 @@ void loop() {
       motors.setSpeeds(400, 400); 
     }
   }
-}
+
