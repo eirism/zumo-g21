@@ -45,6 +45,8 @@ void setup() {
     }
 	sonarR_pointer = 0;
 	sonarL_pointer = 0;
+  pinMode(10, OUTPUT); //
+  pinMode(11, OUTPUT); //
 }
 /*
 unsigned int averageValue(unsigned int[] array){
@@ -97,7 +99,17 @@ void loop() {
 		Wire.beginTransmission(9); 
 		Wire.write(sonarR_distance);            
 		Wire.write(sonarL_distance);            
-		Wire.endTransmission();  
+		Wire.endTransmission();
+    if (sonarR_distance > 0){
+      digitalWrite(10, HIGH);
+    }else{
+      digitalWrite(10, LOW);
+    }
+    if (sonarL_distance > 0){
+      digitalWrite(11, HIGH);
+    }else{
+      digitalWrite(11, LOW);
+    }
 
 		Serial.print(sonarR_distance);
 		Serial.print(" ");

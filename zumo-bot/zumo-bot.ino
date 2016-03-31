@@ -46,9 +46,8 @@ void setup() {
   Wire.onReceive(receiveEvent);
   button.waitForButton();
 
-  pinMode(3, OUTPUT); //
-  pinMode(6, OUTPUT); //
-  pinMode(1, OUTPUT); // indicator for firstTime
+
+  pinMode(6, OUTPUT); // indicator for firstTime
   
   firstTime = true;
   timer = 0;
@@ -62,6 +61,7 @@ void receiveEvent(int bytes) {
 }
 
 void loop() {
+
 
   if (lastSeen !='N' && millis()-timer>LASTSEEN_INTERVAL) {
       lastSeen = 'N';
@@ -99,18 +99,6 @@ void loop() {
   else {
 
     motors.setSpeeds(0, 0);
-
-    if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0){
-      digitalWrite(6, HIGH);
-    }else{
-      digitalWrite(6, LOW);
-    }
-    if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0){
-      digitalWrite(3, HIGH);
-    }else{
-      digitalWrite(3, LOW);
-    }
-
     
     if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance) < 5) {
       motors.setSpeeds(400,400);
@@ -136,6 +124,7 @@ void loop() {
       motors.setSpeeds(-100,400);
     }
     else if (firstTime) {
+      digitalWrite(6, HIGH);
       motors.setSpeeds(350, -350);
 //      if (millis() - rotateStartTime > 200 && millis() - rotateStartTime < 400){
 //        motors.setSpeeds(400, 400);
@@ -147,5 +136,8 @@ void loop() {
     else {
       motors.setSpeeds(400, 400); 
     }
+  }
+  if(!firstTime) {
+    digitalWrite(6, LOW);
   }
 }
