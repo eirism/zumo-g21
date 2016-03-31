@@ -125,15 +125,15 @@ void loop() {
     }
     else if (firstTime) {
       digitalWrite(6, HIGH);
-      motors.setSpeeds(350, -350);
+      motors.setSpeeds(300, -300);
 //      if (millis() - rotateStartTime > 200 && millis() - rotateStartTime < 400){
 //        motors.setSpeeds(400, 400);
 //      }
     }
-    else if (millis() % 1000 < 500){
+    else if (millis() % 500 < 200){
       motors.setSpeeds(300, -300);
     }
-    else {
+    else{
       motors.setSpeeds(400, 400); 
     }
   }

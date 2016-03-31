@@ -9,7 +9,7 @@
 #define ECHO_PIN_R 2
 #define ECHO_PIN_L 7
 
-#define MAX_DISTANCE 70
+#define MAX_DISTANCE 50
 
 #define SONAR_INTERVAL 50
 
@@ -24,7 +24,7 @@ NewPing sonarL(TRIGGER_PIN_SONAR_L, ECHO_PIN_L, MAX_DISTANCE); // NewPing setup 
 unsigned int sonarR_distance;
 unsigned int sonarL_distance;
 
-#define N_MEASUREMENTS 5
+#define N_MEASUREMENTS 1
 
 unsigned int sonarR_array[N_MEASUREMENTS];
 unsigned int sonarL_array[N_MEASUREMENTS];
