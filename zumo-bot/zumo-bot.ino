@@ -112,7 +112,7 @@ void loop() {
     }
 
     
-    if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance < 5)) {
+    if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance) < 5) {
       motors.setSpeeds(400,400);
       lastSeen = 'N';
       firstTime = false;
