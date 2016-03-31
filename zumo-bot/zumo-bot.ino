@@ -160,7 +160,6 @@ void search(){
       timer = millis();
       firstTime = false;
       seen=true;
-
     } 
     else if (lastSeen == 'R') {
       motors.setSpeeds(400,-100);
@@ -173,7 +172,6 @@ void search(){
     else if (firstTime) {
       seen=false;
       motors.setSpeeds(350, -350);
-
       digitalWrite(6, HIGH);
       motors.setSpeeds(300, -300);
     }
@@ -185,7 +183,6 @@ void search(){
 	seen=false;
 	motors.setSpeeds(400, 400); 
     }
-  }
   if(!firstTime) {
     digitalWrite(6, LOW);
   }
