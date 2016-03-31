@@ -9,7 +9,7 @@
 #define ECHO_PIN_R 2
 #define ECHO_PIN_L 7
 
-#define MAX_DISTANCE 70
+#define MAX_DISTANCE 50
 
 #define SONAR_INTERVAL 50
 
@@ -24,7 +24,7 @@ NewPing sonarL(TRIGGER_PIN_SONAR_L, ECHO_PIN_L, MAX_DISTANCE); // NewPing setup 
 unsigned int sonarR_distance;
 unsigned int sonarL_distance;
 
-#define N_MEASUREMENTS 5
+#define N_MEASUREMENTS 1
 
 unsigned int sonarR_array[N_MEASUREMENTS];
 unsigned int sonarL_array[N_MEASUREMENTS];
@@ -45,6 +45,8 @@ void setup() {
     }
 	sonarR_pointer = 0;
 	sonarL_pointer = 0;
+  pinMode(10, OUTPUT); //
+  pinMode(11, OUTPUT); //
 }
 /*
 unsigned int averageValue(unsigned int[] array){
@@ -97,7 +99,17 @@ void loop() {
 		Wire.beginTransmission(9); 
 		Wire.write(sonarR_distance);            
 		Wire.write(sonarL_distance);            
-		Wire.endTransmission();  
+		Wire.endTransmission();
+    if (sonarR_distance > 0){
+      digitalWrite(10, HIGH);
+    }else{
+      digitalWrite(10, LOW);
+    }
+    if (sonarL_distance > 0){
+      digitalWrite(11, HIGH);
+    }else{
+      digitalWrite(11, LOW);
+    }
 
 		Serial.print(sonarR_distance);
 		Serial.print(" ");
