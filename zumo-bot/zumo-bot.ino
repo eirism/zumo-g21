@@ -33,6 +33,9 @@
 
 #define LASTSEEN_INTERVAL 500
 
+#define IR A0
+#define IRDIFF 20 // very sensitive to changes in light in the enviroment
+
 unsigned int sensor_values[NUM_SENSORS];
 
 ZumoReflectanceSensorArray sensors;
@@ -45,22 +48,36 @@ volatile unsigned int sonarL_distance;
 
 char lastSeen;
 
-int timer;
+unsigned long timer;
+
 bool seen;
 bool firstTime;
 
 int rotateStartTime;
+
+int irBaseline;
+
+int turnDir;
+unsigned long avoidEdgeReverseingTimer;
+unsigned long avoidEdgeTurningTimer;
+
+bool temp = false;
 
 void setup() {
     Serial.begin(9600);
     sensors.init();
     Wire.begin(9);
     Wire.onReceive(receiveEvent);
+
+    irBaseline = analogRead(IR);
+
     button.waitForButton();
     seen=false;
     pinMode(6, OUTPUT); // indicator for firstTime
     firstTime = true;
     timer = 0;
+    avoidEdgeReverseingTimer = 0;
+    avoidEdgeTurningTimer = 0;
     rotateStartTime = millis();
 }
 
@@ -78,6 +95,7 @@ void loop() {
     }
 
     sensors.read(sensor_values);
+    int irValue = analogRead(IR);
 
     int left_qtr;
     int right_qtr;
@@ -90,17 +108,41 @@ void loop() {
         right_qtr = 3;
     }
 
-    if (sensor_values[left_qtr] < QTR_THRESHOLD){
-        avoid_edge(1);
+    if(avoidEdgeReverseingTimer>millis()){
+        motors.setSpeeds(-REVERSE_SPEED_QTR, -REVERSE_SPEED_QTR);
+    }
+    else if(avoidEdgeTurningTimer>millis()){
+        motors.setSpeeds(turnDir * TURN_SPEED_QTR, -turnDir * TURN_SPEED_QTR);
+    }
+    else if (temp || (false && sensor_values[left_qtr] < QTR_THRESHOLD)){
+        turnDir = 1;
+        avoidEdgeReverseingTimer = millis() + REVERSE_DURATION_QTR;
+        avoidEdgeTurningTimer = millis() + REVERSE_DURATION_QTR + TURN_DURATION_QTR;
+        temp = false;
+        
+        //avoid_edge(1);
     } 
-    else if (sensor_values[right_qtr] < QTR_THRESHOLD) {
-        avoid_edge(-1);
+    else if (false && sensor_values[right_qtr] < QTR_THRESHOLD) {
+        turnDir = -1;
+        avoidEdgeReverseingTimer = millis() + REVERSE_DURATION_QTR;
+        avoidEdgeTurningTimer = millis() + REVERSE_DURATION_QTR + TURN_DURATION_QTR;
+
+       // avoid_edge(-1);
     } 
-    else{
+    else if(irValue<(irBaseline-IRDIFF)){
+        Serial.println(irValue);
+        temp = true;
+        //avoid_edge(1);
+        //motors.setSpeeds(0, 0);
+    }
+    else if (false){
         search();
     }
+    else{
+        motors.setSpeeds(0, 0);
+    }
 }
-void avoid_edge(int dir){
+void avoid_edge(int dir){// no longer need this function
     motors.setSpeeds(-REVERSE_SPEED_QTR, -REVERSE_SPEED_QTR);
     delay(REVERSE_DURATION_QTR);
     motors.setSpeeds(dir * TURN_SPEED_QTR, -dir * TURN_SPEED_QTR);
