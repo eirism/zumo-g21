@@ -4,14 +4,26 @@
 #include <QTRSensors.h>
 #include <ZumoReflectanceSensorArray.h>
 
-// added a symbolic link from zumo-g21\libraries to my arduino\libraries folder. this works.
+//Speeds for qtr movement
+#define REVERSE_SPEED_QTR     300 
+#define TURN_SPEED_QTR        300
+#define FORWARD_SPEED_QTR     100
+#define REVERSE_DURATION_QTR  200 // ms
+#define TURN_DURATION_QTR     500 // ms
 
-//Speeds for turning
-#define REVERSE_SPEED     300 // 0 is stopped, 400 is full speed
-#define TURN_SPEED        300
-#define FORWARD_SPEED     100
-#define REVERSE_DURATION  200 // ms
-#define TURN_DURATION     500 // ms
+//Speeds for other movement
+#define SEEN_BOTH 400
+#define SEEN_RIGHT_L 400
+#define SEEN_RIGHT_R 200
+#define SEEN_LEFT_L SEEN_RIGHT_R
+#define SEEN_LEFT_R SEEN_RIGHT_L
+#define LASTSEEN_RIGHT_L 400
+#define LASTSEEN_RIGHT_R -100
+#define LASTSEEN_LEFT_L LASTSEEN_RIGHT_R
+#define LASTSEEN_LEFT_R LASTSEEN_RIGHT_L
+#define FIRST_TIME_ROTATE 300
+#define SEARCH_ROTATE 300
+#define SEARCH_FORWARD 400
 
 #define NUM_SENSORS 6
 
@@ -66,14 +78,6 @@ void loop() {
     }
 
     sensors.read(sensor_values);
-//  Serial.print(sensor_values[0]);
-//  Serial.print(" ");
-//  Serial.println(sensor_values[5]);
-    Serial.print(sonarR_distance);
-    Serial.print(" ");
-    //Serial.print(sonarC_distance);
-    Serial.print(" ");
-    Serial.println(sonarL_distance);
 
     int left_qtr;
     int right_qtr;
@@ -87,21 +91,19 @@ void loop() {
     }
 
     if (sensor_values[left_qtr] < QTR_THRESHOLD){
-        // if leftmost sensor detects line, reverse and turn to the right
-        motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-        delay(REVERSE_DURATION);
-        motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
-        delay(TURN_DURATION);
-        motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+        motors.setSpeeds(-REVERSE_SPEED_QTR, -REVERSE_SPEED_QTR);
+        delay(REVERSE_DURATION_QTR);
+        motors.setSpeeds(TURN_SPEED_QTR, -TURN_SPEED_QTR);
+        delay(TURN_DURATION_QTR);
+        motors.setSpeeds(FORWARD_SPEED_QTR, FORWARD_SPEED_QTR);
         lastSeen = 'N';
     } 
     else if (sensor_values[right_qtr] < QTR_THRESHOLD) {
-        // if rightmost sensor detects line, reverse and turn to the left
-        motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-        delay(REVERSE_DURATION);
-        motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
-        delay(TURN_DURATION);
-        motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+        motors.setSpeeds(-REVERSE_SPEED_QTR, -REVERSE_SPEED_QTR);
+        delay(REVERSE_DURATION_QTR);
+        motors.setSpeeds(-TURN_SPEED_QTR, TURN_SPEED_QTR);
+        delay(TURN_DURATION_QTR);
+        motors.setSpeeds(FORWARD_SPEED_QTR, FORWARD_SPEED_QTR);
         lastSeen = 'N';
     } 
     else{
@@ -120,34 +122,33 @@ void search(){
     digitalWrite(6, firstTime);
 
     if (see_right && see_left && abs(sonarR_distance - sonarL_distance) < 5) {
-        motors.setSpeeds(400,400);
         lastSeen = 'N';
+        motors.setSpeeds(SEEN_BOTH,SEEN_BOTH);
     } 
     else if (see_right) {
         lastSeen = 'R';
-        motors.setSpeeds(400,200);
+        motors.setSpeeds(SEEN_RIGHT_L,SEEN_RIGHT_R);
         timer = millis();
     } 
     else if (see_left) {
         lastSeen = 'L';
-        motors.setSpeeds(200,400);
+        motors.setSpeeds(SEEN_LEFT_L,SEEN_LEFT_R);
         timer = millis();
     } 
     else if (lastSeen == 'R') {
-        motors.setSpeeds(400,-100);
+        motors.setSpeeds(LASTSEEN_RIGHT_L,LASTSEEN_RIGHT_R);
     } 
     else if (lastSeen == 'L') {
-        motors.setSpeeds(-100,400);
+        motors.setSpeeds(LASTSEEN_LEFT_L,LASTSEEN_LEFT_R);
     }
     else if (firstTime) {
-        motors.setSpeeds(350, -350);
-        motors.setSpeeds(300, -300);
+        motors.setSpeeds(FIRST_TIME_ROTATE, -FIRST_TIME_ROTATE);
     }
     else if (millis() % 500 < 200){
-        motors.setSpeeds(300, -300);
+        motors.setSpeeds(SEARCH_ROTATE, -SEARCH_ROTATE);
     }
     else {
-        motors.setSpeeds(400, 400); 
+        motors.setSpeeds(SEARCH_FORWARD, SEARCH_FORWARD); 
     }
 }
 
