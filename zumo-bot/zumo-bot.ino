@@ -40,77 +40,62 @@ bool firstTime;
 int rotateStartTime;
 
 void setup() {
-  Serial.begin(9600);
-  sensors.init();
-  Wire.begin(9);
-  Wire.onReceive(receiveEvent);
-  button.waitForButton();
-  seen=false;
-  pinMode(6, OUTPUT); // indicator for firstTime
-  firstTime = true;
-  timer = 0;
-  rotateStartTime = millis();
+    Serial.begin(9600);
+    sensors.init();
+    Wire.begin(9);
+    Wire.onReceive(receiveEvent);
+    button.waitForButton();
+    seen=false;
+    pinMode(6, OUTPUT); // indicator for firstTime
+    firstTime = true;
+    timer = 0;
+    rotateStartTime = millis();
 }
 
 void receiveEvent(int bytes) {
-	sonarR_distance = Wire.read();
-	//sonarC_distance = Wire.read();
-	sonarL_distance = Wire.read();
+    sonarR_distance = Wire.read();
+    //sonarC_distance = Wire.read();
+    sonarL_distance = Wire.read();
 }
 
 void loop() {
 
+    if (lastSeen !='N' && (millis()-timer>LASTSEEN_INTERVAL)) {
+        lastSeen = 'N';
+        timer = 0;
+    }
 
-  if (lastSeen !='N' && millis()-timer>LASTSEEN_INTERVAL) {
-      lastSeen = 'N';
-      timer = 0;
-  }
-
-  sensors.read(sensor_values);
+    sensors.read(sensor_values);
 //  Serial.print(sensor_values[0]);
 //  Serial.print(" ");
 //  Serial.println(sensor_values[5]);
-  Serial.print(sonarR_distance);
-  Serial.print(" ");
-  //Serial.print(sonarC_distance);
-  Serial.print(" ");
-  Serial.println(sonarL_distance);
-  
-if(seen==false){
-	if (sensor_values[0] < QTR_THRESHOLD){
-		// if leftmost sensor detects line, reverse and turn to the right
-		motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-		delay(REVERSE_DURATION);
-		motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
-		delay(TURN_DURATION);
-		motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-		lastSeen = 'N';
-	} 
-	else if (sensor_values[5] < QTR_THRESHOLD) {
-		// if rightmost sensor detects line, reverse and turn to the left
-		motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-		delay(REVERSE_DURATION);
-		motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
-		delay(TURN_DURATION);
-		motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-		lastSeen = 'N';
-	} 
-	else{
-		search();
-	}
-}
-  
-    else if(seen==true){
-           if (sensor_values[2] < QTR_THRESHOLD){
-      // if leftmost sensor detects line, reverse and turn to the right
-      motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-      delay(REVERSE_DURATION);
-      motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
-      delay(TURN_DURATION);
-      motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-      lastSeen = 'N';
+    Serial.print(sonarR_distance);
+    Serial.print(" ");
+    //Serial.print(sonarC_distance);
+    Serial.print(" ");
+    Serial.println(sonarL_distance);
+
+    int left_qtr;
+    int right_qtr;
+    if(!seen){
+        left_qtr = 0;
+        right_qtr = 5; 
+    }
+    else if(seen){
+        left_qtr = 2;
+        right_qtr = 3;
+    }
+
+    if (sensor_values[left_qtr] < QTR_THRESHOLD){
+        // if leftmost sensor detects line, reverse and turn to the right
+        motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+        delay(REVERSE_DURATION);
+        motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
+        delay(TURN_DURATION);
+        motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+        lastSeen = 'N';
     } 
-      else if (sensor_values[3] < QTR_THRESHOLD) {
+    else if (sensor_values[right_qtr] < QTR_THRESHOLD) {
         // if rightmost sensor detects line, reverse and turn to the left
         motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
         delay(REVERSE_DURATION);
@@ -118,73 +103,70 @@ if(seen==false){
         delay(TURN_DURATION);
         motors.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
         lastSeen = 'N';
-      } 
-        else {
-          search();
-      }   
+    } 
+    else{
+        search();
     }
 }
-    
+        
 void search(){
-    
     motors.setSpeeds(0, 0);
 
     if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0){
-      digitalWrite(6, HIGH);
+        digitalWrite(6, HIGH);
     }else{
-      digitalWrite(6, LOW);
+        digitalWrite(6, LOW);
     }
     if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0){
-      digitalWrite(3, HIGH);
-
+        digitalWrite(3, HIGH);
     }else{
-      digitalWrite(3, LOW);
+        digitalWrite(3, LOW);
     }
 
     if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance) < 5) {
-      motors.setSpeeds(400,400);
-      lastSeen = 'N';
-      firstTime = false;
-      seen=true;
+        motors.setSpeeds(400,400);
+        lastSeen = 'N';
+        firstTime = false;
+        seen=true;
     } 
     else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0) {
-      lastSeen = 'R';
-      motors.setSpeeds(400,200);
-      timer = millis();
-      firstTime = false;
-      seen=true;
+        lastSeen = 'R';
+        motors.setSpeeds(400,200);
+        timer = millis();
+        firstTime = false;
+        seen=true;
     } 
     else if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0) {
-      lastSeen = 'L';
-      motors.setSpeeds(200,400);
-      timer = millis();
-      firstTime = false;
-      seen=true;
+        lastSeen = 'L';
+        motors.setSpeeds(200,400);
+        timer = millis();
+        firstTime = false;
+        seen=true;
     } 
     else if (lastSeen == 'R') {
-      motors.setSpeeds(400,-100);
-      seen=false;
+        motors.setSpeeds(400,-100);
+        seen=false;
     } 
     else if (lastSeen == 'L') {
-      motors.setSpeeds(-100,400);
-      seen=false;
+        motors.setSpeeds(-100,400);
+        seen=false;
     }
     else if (firstTime) {
-      seen=false;
-      motors.setSpeeds(350, -350);
-      digitalWrite(6, HIGH);
-      motors.setSpeeds(300, -300);
+        seen=false;
+        motors.setSpeeds(350, -350);
+        digitalWrite(6, HIGH);
+        motors.setSpeeds(300, -300);
     }
     else if (millis() % 500 < 200){
-	seen=false;
-	motors.setSpeeds(300, -300);
+        seen=false;
+        motors.setSpeeds(300, -300);
     }
     else {
-	seen=false;
-	motors.setSpeeds(400, 400); 
+        seen=false;
+        motors.setSpeeds(400, 400); 
     }
-  if(!firstTime) {
-    digitalWrite(6, LOW);
-  }
+    if(!firstTime) {
+        digitalWrite(6, LOW);
+    }
 }
 
