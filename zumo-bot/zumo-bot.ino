@@ -91,24 +91,22 @@ void loop() {
     }
 
     if (sensor_values[left_qtr] < QTR_THRESHOLD){
-        motors.setSpeeds(-REVERSE_SPEED_QTR, -REVERSE_SPEED_QTR);
-        delay(REVERSE_DURATION_QTR);
-        motors.setSpeeds(TURN_SPEED_QTR, -TURN_SPEED_QTR);
-        delay(TURN_DURATION_QTR);
-        motors.setSpeeds(FORWARD_SPEED_QTR, FORWARD_SPEED_QTR);
-        lastSeen = 'N';
+        avoid_edge(1);
     } 
     else if (sensor_values[right_qtr] < QTR_THRESHOLD) {
-        motors.setSpeeds(-REVERSE_SPEED_QTR, -REVERSE_SPEED_QTR);
-        delay(REVERSE_DURATION_QTR);
-        motors.setSpeeds(-TURN_SPEED_QTR, TURN_SPEED_QTR);
-        delay(TURN_DURATION_QTR);
-        motors.setSpeeds(FORWARD_SPEED_QTR, FORWARD_SPEED_QTR);
-        lastSeen = 'N';
+        avoid_edge(-1);
     } 
     else{
         search();
     }
+}
+void avoid_edge(int dir){
+    motors.setSpeeds(-REVERSE_SPEED_QTR, -REVERSE_SPEED_QTR);
+    delay(REVERSE_DURATION_QTR);
+    motors.setSpeeds(dir * TURN_SPEED_QTR, -dir * TURN_SPEED_QTR);
+    delay(TURN_DURATION_QTR);
+    motors.setSpeeds(FORWARD_SPEED_QTR, FORWARD_SPEED_QTR);
+    lastSeen = 'N';
 }
         
 void search(){
