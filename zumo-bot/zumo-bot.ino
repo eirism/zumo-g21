@@ -112,16 +112,8 @@ void loop() {
 void search(){
     motors.setSpeeds(0, 0);
 
-    if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0){
-        digitalWrite(6, HIGH);
-    }else{
-        digitalWrite(6, LOW);
-    }
-    if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0){
-        digitalWrite(3, HIGH);
-    }else{
-        digitalWrite(3, LOW);
-    }
+    digitalWrite(6, (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0));
+    digitalWrite(3, (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0));
 
     if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance) < 5) {
         motors.setSpeeds(400,400);
