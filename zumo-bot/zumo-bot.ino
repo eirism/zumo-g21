@@ -4,6 +4,8 @@
 #include <QTRSensors.h>
 #include <ZumoReflectanceSensorArray.h>
 
+#define GREEN_LED 6
+
 //Speeds for qtr movement
 #define REVERSE_SPEED_QTR     300 
 #define TURN_SPEED_QTR        300
@@ -25,6 +27,11 @@
 #define SEARCH_ROTATE 300
 #define SEARCH_FORWARD 400
 
+#define IR_AVOID_L 400
+#define IR_AVOID_R 100
+#define IR_AVOID_DURATION 400 //ms
+
+
 #define NUM_SENSORS 6
 
 #define QTR_THRESHOLD  1500
@@ -33,8 +40,9 @@
 
 #define LASTSEEN_INTERVAL 500
 
-#define IR A0
-#define IRDIFF 20 // very sensitive to changes in light in the enviroment
+#define DO_QTR true
+#define DO_IR true
+#define DO_SEARCH true
 
 unsigned int sensor_values[NUM_SENSORS];
 
@@ -43,7 +51,6 @@ ZumoMotors motors;
 Pushbutton button(ZUMO_BUTTON);
 
 volatile unsigned int sonarR_distance;
-//unsigned int sonarC_distance;
 volatile unsigned int sonarL_distance;
 
 char lastSeen;
@@ -53,38 +60,35 @@ unsigned long timer;
 bool seen;
 bool firstTime;
 
-int rotateStartTime;
-
-int irBaseline;
+volatile bool ir_active=false;
 
 int turnDir;
 unsigned long avoidEdgeReverseingTimer;
 unsigned long avoidEdgeTurningTimer;
 
-bool temp = false;
+unsigned long irAvoidTimer;
+
 
 void setup() {
     Serial.begin(9600);
     sensors.init();
     Wire.begin(9);
     Wire.onReceive(receiveEvent);
-
-    irBaseline = analogRead(IR);
-
-    button.waitForButton();
+    pinMode(GREEN_LED, OUTPUT); // indicator for ir_active
     seen=false;
-    pinMode(6, OUTPUT); // indicator for firstTime
     firstTime = true;
     timer = 0;
     avoidEdgeReverseingTimer = 0;
     avoidEdgeTurningTimer = 0;
-    rotateStartTime = millis();
+    irAvoidTimer = 0;
+
+    button.waitForButton();
 }
 
 void receiveEvent(int bytes) {
     sonarR_distance = Wire.read();
-    //sonarC_distance = Wire.read();
     sonarL_distance = Wire.read();
+    ir_active = Wire.read();
 }
 
 void loop() {
@@ -95,7 +99,8 @@ void loop() {
     }
 
     sensors.read(sensor_values);
-    int irValue = analogRead(IR);
+
+    digitalWrite(GREEN_LED, ir_active);
 
     int left_qtr;
     int right_qtr;
@@ -114,28 +119,25 @@ void loop() {
     else if(avoidEdgeTurningTimer>millis()){
         motors.setSpeeds(turnDir * TURN_SPEED_QTR, -turnDir * TURN_SPEED_QTR);
     }
-    else if (temp || (false && sensor_values[left_qtr] < QTR_THRESHOLD)){
+    else if (DO_QTR && sensor_values[left_qtr] < QTR_THRESHOLD){
         turnDir = 1;
         avoidEdgeReverseingTimer = millis() + REVERSE_DURATION_QTR;
         avoidEdgeTurningTimer = millis() + REVERSE_DURATION_QTR + TURN_DURATION_QTR;
-        temp = false;
-        
-        //avoid_edge(1);
+        irAvoidTimer = 0;
     } 
-    else if (false && sensor_values[right_qtr] < QTR_THRESHOLD) {
+    else if (DO_QTR && sensor_values[right_qtr] < QTR_THRESHOLD) {
         turnDir = -1;
         avoidEdgeReverseingTimer = millis() + REVERSE_DURATION_QTR;
         avoidEdgeTurningTimer = millis() + REVERSE_DURATION_QTR + TURN_DURATION_QTR;
-
-       // avoid_edge(-1);
+        irAvoidTimer = 0;
     } 
-    else if(irValue<(irBaseline-IRDIFF)){
-        Serial.println(irValue);
-        temp = true;
-        //avoid_edge(1);
-        //motors.setSpeeds(0, 0);
+    else if(irAvoidTimer>millis()){
+        motors.setSpeeds(IR_AVOID_L, IR_AVOID_R);
     }
-    else if (false){
+    else if(DO_IR && ir_active){
+        irAvoidTimer = millis() + IR_AVOID_DURATION;
+    }
+    else if (DO_SEARCH){
         search();
     }
     else{
@@ -159,7 +161,6 @@ void search(){
     seen = see_right || see_left;
 
     firstTime = firstTime && !seen;
-    digitalWrite(6, firstTime);
 
     if (see_right && see_left && abs(sonarR_distance - sonarL_distance) < 5) {
         lastSeen = 'N';
