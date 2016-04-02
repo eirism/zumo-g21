@@ -112,53 +112,42 @@ void loop() {
 void search(){
     motors.setSpeeds(0, 0);
 
-    digitalWrite(6, (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0));
-    digitalWrite(3, (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0));
+    bool see_right = (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0);
+    bool see_left = (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0);
+    seen = see_right || see_left;
 
-    if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0 && sonarL_distance < MAX_DISTANCE && sonarL_distance > 0 && abs(sonarR_distance - sonarL_distance) < 5) {
+    firstTime = firstTime && !seen;
+    digitalWrite(6, firstTime);
+
+    if (see_right && see_left && abs(sonarR_distance - sonarL_distance) < 5) {
         motors.setSpeeds(400,400);
         lastSeen = 'N';
-        firstTime = false;
-        seen=true;
     } 
-    else if (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0) {
+    else if (see_right) {
         lastSeen = 'R';
         motors.setSpeeds(400,200);
         timer = millis();
-        firstTime = false;
-        seen=true;
     } 
-    else if (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0) {
+    else if (see_left) {
         lastSeen = 'L';
         motors.setSpeeds(200,400);
         timer = millis();
-        firstTime = false;
-        seen=true;
     } 
     else if (lastSeen == 'R') {
         motors.setSpeeds(400,-100);
-        seen=false;
     } 
     else if (lastSeen == 'L') {
         motors.setSpeeds(-100,400);
-        seen=false;
     }
     else if (firstTime) {
-        seen=false;
         motors.setSpeeds(350, -350);
-        digitalWrite(6, HIGH);
         motors.setSpeeds(300, -300);
     }
     else if (millis() % 500 < 200){
-        seen=false;
         motors.setSpeeds(300, -300);
     }
     else {
-        seen=false;
         motors.setSpeeds(400, 400); 
-    }
-    if(!firstTime) {
-        digitalWrite(6, LOW);
     }
 }
 
