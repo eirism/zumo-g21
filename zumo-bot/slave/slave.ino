@@ -8,6 +8,8 @@
 
 #define ECHO_PIN_R 2
 #define ECHO_PIN_L 7
+#define RED_LED 10
+#define YELLOW_LED 11
 
 #define MAX_DISTANCE 50
 
@@ -24,48 +26,56 @@ NewPing sonarL(TRIGGER_PIN_SONAR_L, ECHO_PIN_L, MAX_DISTANCE); // NewPing setup 
 unsigned int sonarR_distance;
 unsigned int sonarL_distance;
 
-#define N_MEASUREMENTS 1
+#define N_MEASUREMENTS_SONAR 1
 
-unsigned int sonarR_array[N_MEASUREMENTS];
-unsigned int sonarL_array[N_MEASUREMENTS];
+unsigned int sonarR_array[N_MEASUREMENTS_SONAR];
+unsigned int sonarL_array[N_MEASUREMENTS_SONAR];
 int sonarR_pointer;
 int sonarL_pointer;
 
-unsigned int temp[N_MEASUREMENTS];
+
+#define IR A0
+#define IRDIFF 10 // very sensitive to changes in light in the enviroment
+
+unsigned int ir_distance;
+
+#define N_MEASUREMENTS_IR 10
+
+unsigned int ir_array[N_MEASUREMENTS_IR];
+//int ir_pointer;
+
+unsigned int irBaseline;
 
 unsigned long timer;
 
 void setup() {
-	Serial.begin(9600);
-	Wire.begin(); 
-	timer=0;
-    for(int i=0; i<N_MEASUREMENTS; i++){
-    	sonarR_array[i] = 0;
-    	sonarL_array[i] = 0;
+    Serial.begin(9600);
+    Wire.begin(); 
+    timer=0;
+    for(int i=0; i<N_MEASUREMENTS_SONAR; i++){
+        sonarR_array[i] = 0;
+        sonarL_array[i] = 0;
     }
-	sonarR_pointer = 0;
-	sonarL_pointer = 0;
-  pinMode(10, OUTPUT); //
-  pinMode(11, OUTPUT); //
+    sonarR_pointer = 0;
+    sonarL_pointer = 0;
+    pinMode(RED_LED, OUTPUT);
+    pinMode(YELLOW_LED, OUTPUT);
+    for(int i=0; i<N_MEASUREMENTS_IR; i++){
+        ir_array[i] = analogRead(IR);
+        delay(100);
+    }
+    irBaseline = median(ir_array, N_MEASUREMENTS_IR);
 }
-/*
-unsigned int averageValue(unsigned int[] array){
-	unsigned int mini = -1;
-	for(int i=0; i<6; i++){
-		for(int j=0; j<6; j++){
-			mini = mini < array[j] ? mini : array[j];
-			temp[i] = array[i];
-	}
-	return (temp[2]+temp[3])/2
-}
-*/
-unsigned int median(unsigned int array[]) {
+
+unsigned int median(unsigned int array[], int n) {
+    if(n==0){
+        return array[0];
+    }
     unsigned int temp;
     int i, j;
-    int n = N_MEASUREMENTS;
     unsigned int x[n];
     for(i=0; i<n; i++){
-    	x[i] = array[i];
+        x[i] = array[i];
     }
     // the following two loops sort the array x in ascending order
     for(i=0; i<n-1; i++) {
@@ -87,51 +97,46 @@ unsigned int median(unsigned int array[]) {
         return x[n/2];
     }
 }
+
 void loop() {
-	if((millis()-timer)>=SONAR_INTERVAL){  // runs at 50Hz
-		timer=millis();
-		sonarR_array[sonarR_pointer] = sonarR.ping_cm();
-		sonarL_array[sonarL_pointer] = sonarL.ping_cm();
+    //ir_array[ir_pointer] = analogRead(IR);
+    if((millis()-timer)>=SONAR_INTERVAL){  // runs at 50Hz
+        timer=millis();
+        sonarR_array[sonarR_pointer] = sonarR.ping_cm();
+        sonarL_array[sonarL_pointer] = sonarL.ping_cm();
 
-		sonarR_distance = median(sonarR_array);
-		sonarL_distance = median(sonarL_array);
+        sonarR_distance = median(sonarR_array, N_MEASUREMENTS_SONAR);
+        sonarL_distance = median(sonarL_array, N_MEASUREMENTS_SONAR);
+        ir_distance = analogRead(IR);//median(ir_array, N_MEASUREMENTS_IR);
+        Serial.println(ir_distance);
 
-		Wire.beginTransmission(9); 
-		Wire.write(sonarR_distance);            
-		Wire.write(sonarL_distance);            
-		Wire.endTransmission();
-    if (sonarR_distance > 0){
-      digitalWrite(10, HIGH);
-    }else{
-      digitalWrite(10, LOW);
+        Wire.beginTransmission(9); 
+        Wire.write(sonarR_distance);            
+        Wire.write(sonarL_distance);            
+        Wire.write(ir_distance<(irBaseline-IRDIFF));            
+        Wire.endTransmission();
+
+        digitalWrite(RED_LED, sonarR_distance > 0);
+        digitalWrite(YELLOW_LED, sonarL_distance > 0);
+
+        bool right_bad = (sonarR_array[sonarR_pointer] == 0 ) && digitalRead(ECHO_PIN_R) == HIGH;
+        bool left_bad = (sonarL_array[sonarL_pointer] == 0 ) && digitalRead(ECHO_PIN_L) == HIGH;
+
+        if (right_bad && left_bad) {
+            utils.resetEcho(ECHO_PIN_R, ECHO_PIN_L);   
+        }
+        else if (right_bad) {
+            utils.resetEcho(ECHO_PIN_R);   
+        }
+        else if (left_bad) {
+            utils.resetEcho(ECHO_PIN_L);   
+        } 
+        sonarR_pointer += 1;
+        sonarR_pointer %= N_MEASUREMENTS_SONAR;
+        sonarL_pointer += 1;
+        sonarL_pointer %= N_MEASUREMENTS_SONAR;
+
     }
-    if (sonarL_distance > 0){
-      digitalWrite(11, HIGH);
-    }else{
-      digitalWrite(11, LOW);
-    }
-
-		Serial.print(sonarR_distance);
-		Serial.print(" ");
-		//Serial.print(sonarC_distance);
-		//Serial.print(" ");
-		Serial.println(sonarL_distance);
-
-		bool right_bad = (sonarR_array[sonarR_pointer] == 0 ) && digitalRead(ECHO_PIN_R) == HIGH;
-		bool left_bad = (sonarL_array[sonarL_pointer] == 0 ) && digitalRead(ECHO_PIN_L) == HIGH;
-
-		if (right_bad && left_bad) {
-			utils.resetEcho(ECHO_PIN_R, ECHO_PIN_L);   
-		}
-		else if (right_bad) {
-			utils.resetEcho(ECHO_PIN_R);   
-		}
-		else if (left_bad) {
-			utils.resetEcho(ECHO_PIN_L);   
-		} 
-		sonarR_pointer += 1;
-		sonarR_pointer %= N_MEASUREMENTS;
-		sonarL_pointer += 1;
-		sonarL_pointer %= N_MEASUREMENTS;
-	}
+    //ir_pointer += 1;
+    //ir_pointer %= N_MEASUREMENTS_IR;
 }
