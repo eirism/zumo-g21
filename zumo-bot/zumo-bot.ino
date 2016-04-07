@@ -1,9 +1,13 @@
+//#define PLAY_MUSIC
+
+#ifdef PLAY_MUSIC 
+#include <ZumoMusic.h>
+#endif
 #include <Wire.h>
 #include <ZumoMotors.h>
 #include <Pushbutton.h>
 #include <QTRSensors.h>
 #include <ZumoReflectanceSensorArray.h>
-#include <ZumoMusic.h>
 
 #define GREEN_LED 6
 
@@ -41,10 +45,9 @@
 
 #define LASTSEEN_INTERVAL 500
 
-#define DO_QTR true
+#define DO_QTR false
 #define DO_IR true
-#define DO_SEARCH true
-#define PLAY_MUSIC true
+#define DO_SEARCH false
 
 unsigned int sensor_values[NUM_SENSORS];
 
@@ -70,7 +73,9 @@ unsigned long avoidEdgeTurningTimer;
 
 unsigned long irAvoidTimer;
 
+#ifdef PLAY_MUSIC 
 ZumoMusic music;
+#endif
 
 void setup() {
     Serial.begin(9600);
@@ -86,7 +91,9 @@ void setup() {
     irAvoidTimer = 0;
 
     button.waitForButton();
+    #ifdef PLAY_MUSIC
     music = ZumoMusic();
+    #endif
 }
 
 void receiveEvent(int bytes) {
@@ -97,9 +104,9 @@ void receiveEvent(int bytes) {
 
 void loop() {
 
-    if (PLAY_MUSIC) {
-        music.loop();
-    }
+#ifdef PLAY_MUSIC
+      music.loop();
+#endif
 
     if (lastSeen !='N' && (millis()-timer>LASTSEEN_INTERVAL)) {
         lastSeen = 'N';

@@ -1,8 +1,12 @@
-#include <ZumoMusic.hpp>
+#include <ZumoMusic.h>
+#include <Pushbutton.h>
 
+Pushbutton button(ZUMO_BUTTON);
+ZumoMusic music;
 
 void setup(){
-  ZumoMusic music = ZumoMusic();
+  music = ZumoMusic();
+  button.waitForButton();
 }
 
 
