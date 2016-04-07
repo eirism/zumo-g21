@@ -1,6 +1,6 @@
 #include <ZumoBuzzer.h>
 #include <Arduino.h>
-#include <ZumoMusic.hpp>
+#include "ZumoMusic.h"
 
 
 ZumoMusic::ZumoMusic() {
