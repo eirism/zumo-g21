@@ -23,8 +23,8 @@
 #define LASTSEEN_RIGHT_R -100
 #define LASTSEEN_LEFT_L LASTSEEN_RIGHT_R
 #define LASTSEEN_LEFT_R LASTSEEN_RIGHT_L
-#define FIRST_TIME_ROTATE 300
-#define SEARCH_ROTATE 300
+#define FIRST_TIME_ROTATE 400
+#define SEARCH_ROTATE 400
 #define SEARCH_FORWARD 400
 
 #define IR_AVOID_L 400
@@ -38,7 +38,7 @@
 
 #define MAX_DISTANCE 70
 
-#define LASTSEEN_INTERVAL 1000
+#define LASTSEEN_INTERVAL 750
 
 #define DO_QTR true
 #define DO_IR false
@@ -106,12 +106,12 @@ void loop() {
     int left_qtr;
     int right_qtr;
     if(!trueSeen){
-        left_qtr = 0;
-        right_qtr = 5; 
+        left_qtr = 1;
+        right_qtr = 4; 
     }
     else{
-        left_qtr = 1;
-        right_qtr = 4;
+        left_qtr = 2;
+        right_qtr = 3;
     }
 
     if(avoidEdgeReverseingTimer>millis()){
@@ -187,7 +187,7 @@ void search(){
     else if (firstTime) {
         motors.setSpeeds(FIRST_TIME_ROTATE, -FIRST_TIME_ROTATE);
     }
-    else if (millis() % 500 < 200){
+    else if (millis() % 500 < 500){
         motors.setSpeeds(SEARCH_ROTATE, -SEARCH_ROTATE);
     }
     else {

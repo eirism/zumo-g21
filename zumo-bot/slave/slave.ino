@@ -26,7 +26,7 @@ NewPing sonarL(TRIGGER_PIN_SONAR_L, ECHO_PIN_L, MAX_DISTANCE); // NewPing setup 
 unsigned int sonarR_distance;
 unsigned int sonarL_distance;
 
-#define N_MEASUREMENTS_SONAR 3
+#define N_MEASUREMENTS_SONAR 5
 
 unsigned int sonarR_array[N_MEASUREMENTS_SONAR];
 unsigned int sonarL_array[N_MEASUREMENTS_SONAR];
