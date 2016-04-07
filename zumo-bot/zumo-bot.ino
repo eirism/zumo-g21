@@ -46,7 +46,7 @@
 #define LASTSEEN_INTERVAL 500
 
 #define DO_QTR true
-#define DO_IR true
+#define DO_IR false
 #define DO_SEARCH true
 
 unsigned int sensor_values[NUM_SENSORS];
@@ -63,6 +63,7 @@ char lastSeen;
 unsigned long timer;
 
 bool seen;
+bool trueSeen;
 bool firstTime;
 
 volatile bool ir_active=false;
@@ -115,17 +116,17 @@ void loop() {
 
     sensors.read(sensor_values);
 
-    digitalWrite(GREEN_LED, ir_active);
+    //digitalWrite(GREEN_LED, ir_active);
 
     int left_qtr;
     int right_qtr;
-    if(!seen){
+    if(!trueSeen){
         left_qtr = 0;
         right_qtr = 5; 
     }
-    else if(seen){
-        left_qtr = 2;
-        right_qtr = 3;
+    else{
+        left_qtr = 1;
+        right_qtr = 4;
     }
 
     if(avoidEdgeReverseingTimer>millis()){
@@ -146,7 +147,7 @@ void loop() {
         avoidEdgeTurningTimer = millis() + REVERSE_DURATION_QTR + TURN_DURATION_QTR;
         irAvoidTimer = 0;
     } 
-    else if(irAvoidTimer>millis()){
+    else if(DO_IR && irAvoidTimer>millis()){
         motors.setSpeeds(IR_AVOID_L, IR_AVOID_R);
     }
     else if(DO_IR && ir_active){
@@ -174,6 +175,7 @@ void search(){
     bool see_right = (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0);
     bool see_left = (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0);
     seen = see_right || see_left;
+    trueSeen = see_right && see_left && abs(sonarR_distance - sonarL_distance);
 
     firstTime = firstTime && !seen;
 
