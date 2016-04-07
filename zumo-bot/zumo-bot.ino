@@ -45,9 +45,9 @@
 
 #define LASTSEEN_INTERVAL 500
 
-#define DO_QTR false
+#define DO_QTR true
 #define DO_IR true
-#define DO_SEARCH false
+#define DO_SEARCH true
 
 unsigned int sensor_values[NUM_SENSORS];
 
