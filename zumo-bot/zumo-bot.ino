@@ -1,8 +1,3 @@
-//#define PLAY_MUSIC
-
-#ifdef PLAY_MUSIC 
-#include <ZumoMusic.h>
-#endif
 #include <Wire.h>
 #include <ZumoMotors.h>
 #include <Pushbutton.h>
@@ -43,7 +38,7 @@
 
 #define MAX_DISTANCE 70
 
-#define LASTSEEN_INTERVAL 500
+#define LASTSEEN_INTERVAL 1000
 
 #define DO_QTR true
 #define DO_IR false
@@ -74,9 +69,6 @@ unsigned long avoidEdgeTurningTimer;
 
 unsigned long irAvoidTimer;
 
-#ifdef PLAY_MUSIC 
-ZumoMusic music;
-#endif
 
 void setup() {
     Serial.begin(9600);
@@ -92,9 +84,6 @@ void setup() {
     irAvoidTimer = 0;
 
     button.waitForButton();
-    #ifdef PLAY_MUSIC
-    music = ZumoMusic();
-    #endif
 }
 
 void receiveEvent(int bytes) {
@@ -104,10 +93,6 @@ void receiveEvent(int bytes) {
 }
 
 void loop() {
-
-#ifdef PLAY_MUSIC
-      music.loop();
-#endif
 
     if (lastSeen !='N' && (millis()-timer>LASTSEEN_INTERVAL)) {
         lastSeen = 'N';
@@ -170,7 +155,7 @@ void avoid_edge(int dir){// no longer need this function
 }
         
 void search(){
-    motors.setSpeeds(0, 0);
+    //motors.setSpeeds(0, 0);
 
     bool see_right = (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0);
     bool see_left = (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0);

@@ -13,9 +13,9 @@
 
 #define MAX_DISTANCE 50
 
-#define SONAR_INTERVAL 50
+#define SONAR_INTERVAL 10
 
-#define RESET_TIMEOUT 50
+#define RESET_TIMEOUT 1
 #define IR_THRESHOLD 800
 
 Utils utils(RESET_TIMEOUT, IR_THRESHOLD);
@@ -26,7 +26,7 @@ NewPing sonarL(TRIGGER_PIN_SONAR_L, ECHO_PIN_L, MAX_DISTANCE); // NewPing setup 
 unsigned int sonarR_distance;
 unsigned int sonarL_distance;
 
-#define N_MEASUREMENTS_SONAR 1
+#define N_MEASUREMENTS_SONAR 3
 
 unsigned int sonarR_array[N_MEASUREMENTS_SONAR];
 unsigned int sonarL_array[N_MEASUREMENTS_SONAR];
@@ -60,11 +60,11 @@ void setup() {
     sonarL_pointer = 0;
     pinMode(RED_LED, OUTPUT);
     pinMode(YELLOW_LED, OUTPUT);
-    for(int i=0; i<N_MEASUREMENTS_IR; i++){
-        ir_array[i] = analogRead(IR);
-        delay(100);
-    }
-    irBaseline = median(ir_array, N_MEASUREMENTS_IR);
+    //for(int i=0; i<N_MEASUREMENTS_IR; i++){
+        //ir_array[i] = analogRead(IR);
+        //delay(100);
+    //}
+    //irBaseline = median(ir_array, N_MEASUREMENTS_IR);
 }
 
 unsigned int median(unsigned int array[], int n) {
@@ -107,13 +107,13 @@ void loop() {
 
         sonarR_distance = median(sonarR_array, N_MEASUREMENTS_SONAR);
         sonarL_distance = median(sonarL_array, N_MEASUREMENTS_SONAR);
-        ir_distance = analogRead(IR);//median(ir_array, N_MEASUREMENTS_IR);
-        Serial.println(ir_distance);
+        ir_distance = 0;//analogRead(IR);//median(ir_array, N_MEASUREMENTS_IR);
+        //Serial.println(ir_distance);
 
         Wire.beginTransmission(9); 
         Wire.write(sonarR_distance);            
         Wire.write(sonarL_distance);            
-        Wire.write(ir_distance<(irBaseline-IRDIFF));            
+        Wire.write(false); //ir_distance<(irBaseline-IRDIFF));            
         Wire.endTransmission();
 
         digitalWrite(RED_LED, sonarR_distance > 0);
@@ -136,6 +136,7 @@ void loop() {
         sonarL_pointer += 1;
         sonarL_pointer %= N_MEASUREMENTS_SONAR;
 
+        Serial.println(millis()-timer);
     }
     //ir_pointer += 1;
     //ir_pointer %= N_MEASUREMENTS_IR;
