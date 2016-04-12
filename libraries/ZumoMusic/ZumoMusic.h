@@ -1,8 +1,10 @@
+/* Notes and music from 
+*   http://www.princetronics.com/supermariothemesong/
+*   http://www.instructables.com/id/How-to-easily-play-music-with-buzzer-on-arduino-Th/
+*/
+
 #ifndef MUSIC_HPP
 #define MUSIC_HPP
-// NB: ALL NOTES DEFINED WITH STANDARD ENGLISH NAMES, EXCEPT FROM "A"
-//THAT IS CALLED WITH THE ITALIAN NAME "LA" BECAUSE A0,A1...ARE THE ANALOG PINS ON ARDUINO.
-// (Ab IS CALLED Ab AND NOT LAb)
 
 #define C0 16
 #define Db0 17
@@ -104,9 +106,6 @@
 #define Db8 4435
 #define D8  4699
 #define Eb8 4978
-// NB: ALL NOTES DEFINED WITH STANDARD ENGLISH NAMES, EXCEPT FROM "A"
-//THAT IS CALLED WITH THE ITALIAN NAME "LA" BECAUSE A0,A1...ARE THE ANALOG PINS ON ARDUINO.
-// (Ab IS CALLED Ab AND NOT LAb)
 
 // DURATION OF THE NOTES
 
