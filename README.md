@@ -6,5 +6,7 @@ zumo-bot.ino is the main program, slave.ino is to be run on the slave arduino
 
 Needs libraries from https://github.com/IDI-PLab/plab-library
 
+Built using Pololu Zumo Robot for Arduino, https://www.pololu.com/category/169/zumo-robot-for-arduino and two HC-SR04 ultrasonic sensor. The pair of sensors we used suffered from a timeout problem, and the sketch incorporates code to reset them. 
+
 TODO:
  Add diagram/presentation of behaviour
