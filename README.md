@@ -4,5 +4,7 @@ Examles are to be saved in the examples\ folder
 
 zumo-bot.ino is the main program, slave.ino is to be run on the slave arduino
 
+Needs libraries from https://github.com/IDI-PLab/plab-library
+
 TODO:
  Add diagram/presentation of behaviour
