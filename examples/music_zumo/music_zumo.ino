@@ -1,3 +1,9 @@
+/* Inspiration and notes from 
+http://www.princetronics.com/supermariothemesong/
+http://www.instructables.com/id/How-to-easily-play-music-with-buzzer-on-arduino-Th/
+
+*/
+
 #include <Pushbutton.h>
 #include <ZumoMotors.h>
 #include <ZumoBuzzer.h>
