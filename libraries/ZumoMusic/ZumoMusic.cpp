@@ -5,29 +5,28 @@
 
 ZumoMusic::ZumoMusic() {
   pinMode(3, OUTPUT);
- to_wait = 0;
-
-pos = 0;
-
-toggle = false;
-prev = true;
-
-
-
-playNotes = notes;
-playDelays = delays;
-arraySize = sizeof(notes); randomSeed(millis());
+  to_wait = 0;
+  
+  pos = 0;
+  
+  toggle = false;
+  prev = true;
+  
+  playNotes = notes;
+  playDelays = delays;
+  arraySize = sizeof(notes);
+  randomSeed(millis());
   chooseMusic();
 }
 
-double ZumoMusic::tone_wrapper(int note, int dur) {
+
+int ZumoMusic::tone_wrapper(int note, int dur) {
   tone(3, note, dur);
   return dur + 1;
 }
 
-// the loop routine runs over and over again forever:
+
 void ZumoMusic::loop() {
-  //tone(pin, note, duration)
   long curMillis = millis();
   if (curMillis - prevTone >= to_wait) {
     to_wait = tone_wrapper(playNotes[pos], playDelays[pos]);
