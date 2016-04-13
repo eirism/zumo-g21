@@ -15,8 +15,8 @@
 
 //Speeds for other movement
 #define SEEN_BOTH 400
-#define SEEN_RIGHT_L 400
-#define SEEN_RIGHT_R 200
+#define SEEN_RIGHT_L 400 // runs at full speed if it detects anything. 
+#define SEEN_RIGHT_R 400 // this is to avoid losing in situations where two bots are locked onto each other
 #define SEEN_LEFT_L SEEN_RIGHT_R
 #define SEEN_LEFT_R SEEN_RIGHT_L
 #define LASTSEEN_RIGHT_L 400
@@ -36,12 +36,11 @@
 
 #define QTR_THRESHOLD  1500
 
-#define MAX_DISTANCE 70
+#define MAX_DISTANCE 50 // this does not define the actual max distance of the sensors, as they are on another arduino
 
-#define LASTSEEN_INTERVAL 750
+#define LASTSEEN_INTERVAL 750 // how long to remember having seen anything, in ms
 
 #define DO_QTR true
-#define DO_IR false
 #define DO_SEARCH true
 
 unsigned int sensor_values[NUM_SENSORS];
@@ -54,20 +53,15 @@ volatile unsigned int sonarR_distance;
 volatile unsigned int sonarL_distance;
 
 char lastSeen;
-
-unsigned long timer;
+unsigned long lastSeenTimer;
 
 bool seen;
 bool trueSeen;
 bool firstTime;
 
-volatile bool ir_active=false;
-
 int turnDir;
 unsigned long avoidEdgeReverseingTimer;
 unsigned long avoidEdgeTurningTimer;
-
-unsigned long irAvoidTimer;
 
 
 void setup() {
@@ -75,39 +69,33 @@ void setup() {
     sensors.init();
     Wire.begin(9);
     Wire.onReceive(receiveEvent);
-    pinMode(GREEN_LED, OUTPUT); // indicator for ir_active
     seen=false;
     firstTime = true;
-    timer = 0;
+    lastSeenTimer = 0;
     avoidEdgeReverseingTimer = 0;
     avoidEdgeTurningTimer = 0;
-    irAvoidTimer = 0;
-
     button.waitForButton();
 }
 
 void receiveEvent(int bytes) {
     sonarR_distance = Wire.read();
     sonarL_distance = Wire.read();
-    ir_active = Wire.read();
 }
 
 void loop() {
 
-    if (lastSeen !='N' && (millis()-timer>LASTSEEN_INTERVAL)) {
+    if (lastSeen !='N' && (millis()-lastSeenTimer>LASTSEEN_INTERVAL)) {
         lastSeen = 'N';
-        timer = 0;
+        lastSeenTimer = 0;
     }
 
     sensors.read(sensor_values);
 
-    //digitalWrite(GREEN_LED, ir_active);
-
     int left_qtr;
     int right_qtr;
     if(!trueSeen){
-        left_qtr = 1;
-        right_qtr = 4; 
+        left_qtr = 0;
+        right_qtr = 5; 
     }
     else{
         left_qtr = 2;
@@ -124,20 +112,12 @@ void loop() {
         turnDir = 1;
         avoidEdgeReverseingTimer = millis() + REVERSE_DURATION_QTR;
         avoidEdgeTurningTimer = millis() + REVERSE_DURATION_QTR + TURN_DURATION_QTR;
-        irAvoidTimer = 0;
     } 
     else if (DO_QTR && sensor_values[right_qtr] < QTR_THRESHOLD) {
         turnDir = -1;
         avoidEdgeReverseingTimer = millis() + REVERSE_DURATION_QTR;
         avoidEdgeTurningTimer = millis() + REVERSE_DURATION_QTR + TURN_DURATION_QTR;
-        irAvoidTimer = 0;
     } 
-    else if(DO_IR && irAvoidTimer>millis()){
-        motors.setSpeeds(IR_AVOID_L, IR_AVOID_R);
-    }
-    else if(DO_IR && ir_active){
-        irAvoidTimer = millis() + IR_AVOID_DURATION;
-    }
     else if (DO_SEARCH){
         search();
     }
@@ -145,24 +125,15 @@ void loop() {
         motors.setSpeeds(0, 0);
     }
 }
-void avoid_edge(int dir){// no longer need this function
-    motors.setSpeeds(-REVERSE_SPEED_QTR, -REVERSE_SPEED_QTR);
-    delay(REVERSE_DURATION_QTR);
-    motors.setSpeeds(dir * TURN_SPEED_QTR, -dir * TURN_SPEED_QTR);
-    delay(TURN_DURATION_QTR);
-    motors.setSpeeds(FORWARD_SPEED_QTR, FORWARD_SPEED_QTR);
-    lastSeen = 'N';
-}
+
         
 void search(){
-    //motors.setSpeeds(0, 0);
 
     bool see_right = (sonarR_distance < MAX_DISTANCE && sonarR_distance > 0);
     bool see_left = (sonarL_distance < MAX_DISTANCE && sonarL_distance > 0);
     seen = see_right || see_left;
-    trueSeen = see_right && see_left && abs(sonarR_distance - sonarL_distance);
 
-    firstTime = firstTime && !seen;
+    firstTime = firstTime && !seen; // firsttime resets when we see anything
 
     if (see_right && see_left && abs(sonarR_distance - sonarL_distance) < 5) {
         lastSeen = 'N';
@@ -171,23 +142,27 @@ void search(){
     else if (see_right) {
         lastSeen = 'R';
         motors.setSpeeds(SEEN_RIGHT_L,SEEN_RIGHT_R);
-        timer = millis();
+        lastSeenTimer = millis(); // this "resets" the time until we throw away the lastseen data
     } 
     else if (see_left) {
         lastSeen = 'L';
         motors.setSpeeds(SEEN_LEFT_L,SEEN_LEFT_R);
-        timer = millis();
+        lastSeenTimer = millis(); // this "resets" the time until we throw away the lastseen data
     } 
     else if (lastSeen == 'R') {
-        motors.setSpeeds(LASTSEEN_RIGHT_L,LASTSEEN_RIGHT_R);
+        // motors.setSpeeds(LASTSEEN_RIGHT_L,LASTSEEN_RIGHT_R);
+        // this change makes the bot spin in the direction it last saw something, instead of trying to follow like it did before
+        motors.setSpeeds(SEARCH_ROTATE, -SEARCH_ROTATE);
     } 
     else if (lastSeen == 'L') {
-        motors.setSpeeds(LASTSEEN_LEFT_L,LASTSEEN_LEFT_R);
+        // motors.setSpeeds(LASTSEEN_LEFT_L,LASTSEEN_LEFT_R);
+        // this change makes the bot spin in the direction it last saw something, instead of trying to follow like it did before
+        motors.setSpeeds(-SEARCH_ROTATE, SEARCH_ROTATE);
     }
     else if (firstTime) {
         motors.setSpeeds(FIRST_TIME_ROTATE, -FIRST_TIME_ROTATE);
     }
-    else if (millis() % 500 < 500){
+    else if (millis() % 500 < 250){ // with no info we rotate half the time, and move forward the other half
         motors.setSpeeds(SEARCH_ROTATE, -SEARCH_ROTATE);
     }
     else {
