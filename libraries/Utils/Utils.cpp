@@ -1,3 +1,5 @@
+// resetEcho code retrieved from http://forum.arduino.cc/index.php?topic=55119.30
+
 #include "Arduino.h"
 #include "Utils.h"
 

@@ -1,24 +1,12 @@
+This repository contains code for the zumo-bot challenge given in the course TDT4112 at NTNU spring 2016.
+
 Examles are to be saved in the examples\ folder
 
-The zumo-bot sketch is the main program, it should always work on master.
+zumo-bot.ino is the main program, slave.ino is to be run on the slave arduino
 
-IR-sensor:
-Top view - led to the right
+Needs libraries from https://github.com/IDI-PLab/plab-library
 
-Sensor (Needs pull-up) | 5V (REMEMBER RESISTOR!!)
+Built using Pololu Zumo Robot for Arduino, https://www.pololu.com/category/169/zumo-robot-for-arduino and two HC-SR04 ultrasonic sensor. The pair of sensors we used suffered from a timeout problem, and the sketch incorporates code to reset them. 
 
-GND | GND
-
-
-Behaviour:
-Check if over line/edge, if yes: back up, return;
-
-Check accelerometer (standing still). If movement, ESCAPE!, return;
-
-Check if ir-front senses anything. If yes, turn against it and speed up, return;
-
-Check ultrasonic front, speed up and turn against detected object, return;
-
-Check ultrasonic back, turn around if detected (180 dgr), return;
-
-Turn around while scanning. If turned one revolution, stop and drive for a while, return;
+TODO:
+ Add diagram/presentation of behaviour
